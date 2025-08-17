@@ -212,7 +212,7 @@
     <div id="message-box" class="message-box"></div>
     <script>
         // Array of card emojis (pairs)
-        const cardsArray = ['🎈', '🎉', '🌟', '🌈', '🍦', '🍩', '�', '👑'];
+        const cardsArray = ['🎈', '🎉', '🌟', '🌈', '🍦', '🍩', '🚀', '👑'];
         const allCards = [...cardsArray, ...cardsArray]; // Create pairs
 
         // Game state variables
@@ -244,7 +244,7 @@
 
             const cardFaceFront = document.createElement('div');
             cardFaceFront.classList.add('card-face', 'card-face-front');
-            cardFaceFront.textContent = '?';
+            cardFaceFront.textContent = '✨';
 
             const cardFaceBack = document.createElement('div');
             cardFaceBack.classList.add('card-face', 'card-face-back');
@@ -350,7 +350,8 @@
                 const cardElement = createCard(emoji);
                 board.appendChild(cardElement);
             });
-            showMessage('💡 Find the matching pairs!', false);
+            // Changed the message to not use a character that causes rendering issues.
+            showMessage('Find the matching pairs!', false);
             
             // Immediately hide message box after a few seconds
             setTimeout(() => {
@@ -375,4 +376,3 @@
     </script>
 </body>
 </html>
-�
