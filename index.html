@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bereket's Memory Match Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* General Body and Layout Styling */
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #f0f4f8, #c1d3e8);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Main Game Container */
+        .game-container {
+            background-color: #ffffff;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 90%;
+            width: 600px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: transform 0.3s ease-in-out;
+        }
+
+        /* Title and Info */
+        h1 {
+            font-family: 'Pacifico', cursive;
+            font-size: 2.5rem;
+            color: #1a237e;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-panel {
+            display: flex;
+            justify-content: space-between;
+            width: 100%;
+            margin-bottom: 20px;
+            font-size: 1.2rem;
+            font-weight: 600;
+        }
+
+        /* Game Board */
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            width: 100%;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Card Styling */
+        .card {
+            background-color: #4a90e2;
+            height: 100px;
+            border-radius: 12px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 2.5rem;
+            cursor: pointer;
+            user-select: none;
+            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+            transform-style: preserve-3d;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .card.is-flipped {
+            transform: rotateY(180deg);
+        }
+        .card .card-face {
+            backface-visibility: hidden;
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            border-radius: 12px;
+        }
+        .card .card-face-front {
+            background-color: #4a90e2;
+            transform: rotateY(0deg);
+            color: white;
+            font-size: 1.5rem;
+        }
+        .card .card-face-back {
+            background-color: #f8f9fa;
+            transform: rotateY(180deg);
+            color: #333;
+        }
+
+        /* Matched and Matched-2 Styling */
+        .card.matched .card-face-back {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .card.matched-2 .card-face-back {
+             background-color: #e2f0d4;
+             color: #245715;
+        }
+
+        /* Button Styling */
+        .restart-button {
+            margin-top: 20px;
+            padding: 12px 24px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #ffffff;
+            background-color: #333;
+            border: none;
+            border-radius: 50px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .restart-button:hover {
+            background-color: #000;
+            transform: translateY(-2px);
+        }
+
+        /* Message Box */
+        .message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0.8);
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 15px;
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+            visibility: hidden;
+            opacity: 0;
+            transition: all 0.3s ease-in-out;
+            z-index: 10;
+        }
+        .message-box.show {
+            visibility: visible;
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Bereket's Memory Match Game</h1>
+        <div class="info-panel">
+            <div id="flips-count">Flips: 0</div>
+            <div id="matches-count">Matches: 0</div>
+        </div>
+        <div class="game-board" id="game-board"></div>
+        <button class="restart-button" onclick="startGame()">Restart Game</button>
+    </div>
+    <div id="message-box" class="message-box"></div>
+    <script>
+        // Array of card emojis (pairs)
+        const cardsArray = ['🎈', '🎉', '🌟', '🌈', '🍦', '🍩', '🚀', '👑'];
+        const allCards = [...cardsArray, ...cardsArray]; // Create pairs
+
+        // Game state variables
+        let flips = 0;
+        let matches = 0;
+        let flippedCards = [];
+        let canFlip = true;
+
+        const board = document.getElementById('game-board');
+        const flipsDisplay = document.getElementById('flips-count');
+        const matchesDisplay = document.getElementById('matches-count');
+        const messageBox = document.getElementById('message-box');
+
+        // Function to shuffle the cards using the Fisher-Yates algorithm
+        function shuffle(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        // Function to create a single card element
+        function createCard(emoji) {
+            const card = document.createElement('div');
+            card.classList.add('card');
+            card.dataset.emoji = emoji;
+
+            const cardFaceFront = document.createElement('div');
+            cardFaceFront.classList.add('card-face', 'card-face-front');
+            cardFaceFront.textContent = '?';
+
+            const cardFaceBack = document.createElement('div');
+            cardFaceBack.classList.add('card-face', 'card-face-back');
+            cardFaceBack.textContent = emoji;
+
+            card.appendChild(cardFaceFront);
+            card.appendChild(cardFaceBack);
+
+            card.addEventListener('click', flipCard);
+            return card;
+        }
+
+        // Function to handle the card flip logic
+        function flipCard(event) {
+            const card = event.currentTarget;
+
+            // Prevent flipping a matched or already flipped card, or if a timer is active
+            if (!canFlip || card.classList.contains('is-flipped') || card.classList.contains('matched')) {
+                return;
+            }
+
+            card.classList.add('is-flipped');
+            flippedCards.push(card);
+            flips++;
+            flipsDisplay.textContent = `Flips: ${flips}`;
+
+            // Check if two cards are flipped
+            if (flippedCards.length === 2) {
+                canFlip = false;
+                setTimeout(checkForMatch, 1000);
+            }
+        }
+
+        // Function to check if the two flipped cards match
+        function checkForMatch() {
+            const [card1, card2] = flippedCards;
+
+            if (card1.dataset.emoji === card2.dataset.emoji) {
+                // It's a match!
+                matches++;
+                matchesDisplay.textContent = `Matches: ${matches}`;
+                card1.classList.add('matched');
+                card2.classList.add('matched');
+                
+                // Add a secondary color to distinguish the matched pairs
+                if (matches % 2 === 0) {
+                     card1.classList.add('matched-2');
+                     card2.classList.add('matched-2');
+                }
+
+                // Check for win condition
+                if (matches === cardsArray.length) {
+                    showMessage('🥳 You Win! 🥳', true);
+                }
+            } else {
+                // Not a match, flip them back
+                card1.classList.remove('is-flipped');
+                card2.classList.remove('is-flipped');
+            }
+
+            // Reset for the next turn
+            flippedCards = [];
+            canFlip = true;
+        }
+
+        // Function to display a message
+        function showMessage(text, isWin = false) {
+            messageBox.textContent = text;
+            messageBox.classList.add('show');
+            if (isWin) {
+                setTimeout(() => {
+                    messageBox.classList.remove('show');
+                }, 3000);
+            }
+        }
+
+        // Function to start or restart the game
+        function startGame() {
+            // Reset game state
+            flips = 0;
+            matches = 0;
+            flippedCards = [];
+            canFlip = true;
+
+            // Clear the board
+            board.innerHTML = '';
+            flipsDisplay.textContent = 'Flips: 0';
+            matchesDisplay.textContent = 'Matches: 0';
+            messageBox.classList.remove('show');
+
+            // Shuffle cards and create the board
+            const shuffledCards = shuffle(allCards);
+            shuffledCards.forEach(emoji => {
+                const cardElement = createCard(emoji);
+                board.appendChild(cardElement);
+            });
+            showMessage('💡 Find the matching pairs!', false);
+            
+            // Immediately hide message box after a few seconds
+            setTimeout(() => {
+                 messageBox.classList.remove('show');
+            }, 3000);
+        }
+
+        // Start the game when the page loads
+        window.onload = startGame;
+    </script>
+</body>
+</html>
