@@ -8,22 +8,58 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
     <style>
+        /* CSS Variables for Theming */
+        :root {
+            --background-color: #f0f4f8;
+            --container-bg: #ffffff;
+            --card-front-bg: #4a90e2;
+            --card-back-bg: #f8f9fa;
+            --card-front-text-color: white;
+            --card-back-text-color: #333;
+            --matched-bg-1: #d4edda;
+            --matched-text-1: #155724;
+            --matched-bg-2: #e2f0d4;
+            --matched-text-2: #245715;
+            --title-color: #1a237e;
+            --text-color: #333;
+            --button-bg: #333;
+            --button-hover-bg: #000;
+        }
+
+        /* Dark Mode Overrides */
+        body.dark-mode {
+            --background-color: #1a1a2e;
+            --container-bg: #27283c;
+            --card-front-bg: #4a5482;
+            --card-back-bg: #f8f9fa;
+            --card-front-text-color: white;
+            --card-back-text-color: #333;
+            --matched-bg-1: #4a824a;
+            --matched-text-1: #c3f2c3;
+            --matched-bg-2: #6d996d;
+            --matched-text-2: #e0f8e0;
+            --title-color: #a8dadc;
+            --text-color: #e0f8ff;
+            --button-bg: #a8dadc;
+            --button-hover-bg: #7dc4c6;
+        }
+        
         /* General Body and Layout Styling */
         body {
             font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, #f0f4f8, #c1d3e8);
+            background: linear-gradient(135deg, var(--background-color), #c1d3e8);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
             margin: 0;
-            color: #333;
+            color: var(--text-color);
             text-align: center;
+            transition: background 0.5s ease;
         }
 
-        /* Main Game Container */
         .game-container {
-            background-color: #ffffff;
+            background-color: var(--container-bg);
             padding: 30px;
             border-radius: 20px;
             box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
@@ -32,14 +68,13 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            transition: transform 0.3s ease-in-out;
+            transition: background-color 0.5s ease;
         }
 
-        /* Title and Info */
         h1 {
             font-family: 'Pacifico', cursive;
             font-size: 2.5rem;
-            color: #1a237e;
+            color: var(--title-color);
             margin-bottom: 20px;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
@@ -53,7 +88,6 @@
             font-weight: 600;
         }
 
-        /* Game Board */
         .game-board {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -63,9 +97,8 @@
             margin: 0 auto;
         }
 
-        /* Card Styling */
         .card {
-            background-color: #4a90e2;
+            background-color: var(--card-front-bg);
             height: 100px;
             border-radius: 12px;
             display: flex;
@@ -92,47 +125,53 @@
             border-radius: 12px;
         }
         .card .card-face-front {
-            background-color: #4a90e2;
+            background-color: var(--card-front-bg);
             transform: rotateY(0deg);
-            color: white;
+            color: var(--card-front-text-color);
             font-size: 1.5rem;
         }
         .card .card-face-back {
-            background-color: #f8f9fa;
+            background-color: var(--card-back-bg);
             transform: rotateY(180deg);
-            color: #333;
+            color: var(--card-back-text-color);
         }
 
-        /* Matched and Matched-2 Styling */
         .card.matched .card-face-back {
-            background-color: #d4edda;
-            color: #155724;
+            background-color: var(--matched-bg-1);
+            color: var(--matched-text-1);
         }
         .card.matched-2 .card-face-back {
-             background-color: #e2f0d4;
-             color: #245715;
+             background-color: var(--matched-bg-2);
+             color: var(--matched-text-2);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
         }
 
-        /* Button Styling */
-        .restart-button {
-            margin-top: 20px;
+        .restart-button, .theme-button {
             padding: 12px 24px;
             font-size: 1rem;
             font-weight: 600;
-            color: #ffffff;
-            background-color: #333;
+            color: var(--card-front-text-color);
+            background-color: var(--button-bg);
             border: none;
             border-radius: 50px;
             cursor: pointer;
             box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
             transition: background-color 0.3s ease, transform 0.2s ease;
         }
-        .restart-button:hover {
-            background-color: #000;
+        .restart-button:hover, .theme-button:hover {
+            background-color: var(--button-hover-bg);
             transform: translateY(-2px);
         }
+        .theme-button {
+            padding: 12px;
+            font-size: 1.5rem;
+        }
 
-        /* Message Box */
         .message-box {
             position: fixed;
             top: 50%;
@@ -165,12 +204,15 @@
             <div id="matches-count">Matches: 0</div>
         </div>
         <div class="game-board" id="game-board"></div>
-        <button class="restart-button" onclick="startGame()">Restart Game</button>
+        <div class="button-group">
+            <button class="restart-button" onclick="startGame()">Restart Game</button>
+            <button class="theme-button" onclick="toggleDarkMode()">🌙</button>
+        </div>
     </div>
     <div id="message-box" class="message-box"></div>
     <script>
         // Array of card emojis (pairs)
-        const cardsArray = ['🎈', '🎉', '🌟', '🌈', '🍦', '🍩', '🚀', '👑'];
+        const cardsArray = ['🎈', '🎉', '🌟', '🌈', '🍦', '🍩', '�', '👑'];
         const allCards = [...cardsArray, ...cardsArray]; // Create pairs
 
         // Game state variables
@@ -179,6 +221,7 @@
         let flippedCards = [];
         let canFlip = true;
 
+        const body = document.body;
         const board = document.getElementById('game-board');
         const flipsDisplay = document.getElementById('flips-count');
         const matchesDisplay = document.getElementById('matches-count');
@@ -278,6 +321,15 @@
             }
         }
 
+        // Function to toggle between light and dark mode
+        function toggleDarkMode() {
+            const themeButton = document.querySelector('.theme-button');
+            body.classList.toggle('dark-mode');
+            const isDarkMode = body.classList.contains('dark-mode');
+            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
+            themeButton.textContent = isDarkMode ? '☀️' : '🌙';
+        }
+
         // Function to start or restart the game
         function startGame() {
             // Reset game state
@@ -306,8 +358,21 @@
             }, 3000);
         }
 
-        // Start the game when the page loads
-        window.onload = startGame;
+        // Check for saved theme preference on page load
+        function checkThemePreference() {
+            const savedTheme = localStorage.getItem('theme');
+            if (savedTheme === 'dark') {
+                body.classList.add('dark-mode');
+                document.querySelector('.theme-button').textContent = '☀️';
+            }
+        }
+
+        // Start the game and check for theme preference when the page loads
+        window.onload = () => {
+            checkThemePreference();
+            startGame();
+        };
     </script>
 </body>
 </html>
+�
