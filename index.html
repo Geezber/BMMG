@@ -1,378 +1,663 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Bereket's Memory Match Game</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Pacifico&family=Poppins:wght@400;600&display=swap" rel="stylesheet">
-    <style>
-        /* CSS Variables for Theming */
-        :root {
-            --background-color: #f0f4f8;
-            --container-bg: #ffffff;
-            --card-front-bg: #4a90e2;
-            --card-back-bg: #f8f9fa;
-            --card-front-text-color: white;
-            --card-back-text-color: #333;
-            --matched-bg-1: #d4edda;
-            --matched-text-1: #155724;
-            --matched-bg-2: #e2f0d4;
-            --matched-text-2: #245715;
-            --title-color: #1a237e;
-            --text-color: #333;
-            --button-bg: #333;
-            --button-hover-bg: #000;
-        }
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Bereket's Memory Match Game</title>
+<meta name="theme-color" content="#111111">
+<style>
+  :root {
+    --bg: #0f1115;
+    --bg-soft: #151923;
+    --panel: #1b2130;
+    --text: #e7ecf3;
+    --muted: #9aa7bd;
+    --accent: #7c5cff;
+    --accent-2: #2ed3a5;
+    --bad: #ff6b6b;
+    --good: #2dd4bf;
+    --card: #0f1115;
+    --shadow: 0 10px 30px rgba(0,0,0,.35);
+    --radius: 14px;
+    --gap: 10px;
+    --card-size: clamp(68px, 20vw, 110px);
+  }
+  [data-theme="light"]{
+    --bg: #f7f8fb;
+    --bg-soft: #ffffff;
+    --panel: #ffffff;
+    --text: #0f1220;
+    --muted: #48506a;
+    --accent: #5b38ff;
+    --accent-2: #13b28a;
+    --bad: #e24a4a;
+    --good: #07a884;
+    --card: #ffffff;
+    --shadow: 0 10px 24px rgba(13,23,54,.12);
+  }
+  * { box-sizing: border-box }
+  html, body { height: 100% }
+  body {
+    margin: 0;
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji","Segoe UI Emoji";
+    background: radial-gradient(1200px 800px at 10% -10%, #1b2130, transparent 60%), var(--bg);
+    color: var(--text);
+    display: grid;
+    grid-template-rows: auto auto 1fr auto;
+    gap: 12px;
+    align-content: start;
+    -webkit-tap-highlight-color: transparent;
+  }
 
-        /* Dark Mode Overrides */
-        body.dark-mode {
-            --background-color: #1a1a2e;
-            --container-bg: #27283c;
-            --card-front-bg: #4a5482;
-            --card-back-bg: #f8f9fa;
-            --card-front-text-color: white;
-            --card-back-text-color: #333;
-            --matched-bg-1: #4a824a;
-            --matched-text-1: #c3f2c3;
-            --matched-bg-2: #6d996d;
-            --matched-text-2: #e0f8e0;
-            --title-color: #a8dadc;
-            --text-color: #e0f8ff;
-            --button-bg: #a8dadc;
-            --button-hover-bg: #7dc4c6;
-        }
-        
-        /* General Body and Layout Styling */
-        body {
-            font-family: 'Poppins', sans-serif;
-            background: linear-gradient(135deg, var(--background-color), #c1d3e8);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            color: var(--text-color);
-            text-align: center;
-            transition: background 0.5s ease;
-        }
+  header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px clamp(14px, 3vw, 28px);
+    background: linear-gradient(180deg, var(--bg-soft), transparent 70%);
+    position: sticky; top: 0; z-index: 10; backdrop-filter: saturate(1.1) blur(6px);
+  }
+  .brand { display: flex; align-items: center; gap: 12px; }
+  .logo {
+    width: 36px; height: 36px; display: grid; place-items: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2));
+    color: white; border-radius: 10px; font-weight: 800; box-shadow: var(--shadow);
+  }
+  h1 { font-size: clamp(18px, 4vw, 24px); margin: 0; letter-spacing: .3px }
+  .controls {
+    display: flex; flex-wrap: wrap; gap: 8px;
+  }
+  .btn, select, .toggle {
+    background: var(--panel); color: var(--text);
+    border: 1px solid rgba(255,255,255,.08);
+    padding: 8px 12px; border-radius: 10px; line-height: 1;
+    display: inline-flex; align-items: center; gap: 8px;
+    box-shadow: var(--shadow);
+    font-weight: 600; cursor: pointer; user-select: none;
+  }
+  .btn.primary { background: linear-gradient(135deg, var(--accent), var(--accent-2)); border-color: transparent; }
+  .btn:disabled { opacity: .6; pointer-events: none }
+  select { appearance: none; padding-right: 36px; background-image:
+    linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+    linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+    background-position: right 12px top 50%, right 6px top 50%;
+    background-size: 6px 6px, 6px 6px; background-repeat: no-repeat;
+  }
 
-        .game-container {
-            background-color: var(--container-bg);
-            padding: 30px;
-            border-radius: 20px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-            max-width: 90%;
-            width: 600px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transition: background-color 0.5s ease;
-        }
+  .stats {
+    margin: 0 14px;
+    display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px;
+  }
+  .stat {
+    background: var(--panel); border: 1px solid rgba(255,255,255,.08);
+    border-radius: var(--radius); padding: 10px 12px; box-shadow: var(--shadow);
+    display: grid; gap: 4px; text-align: center;
+  }
+  .stat .label { font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .12em }
+  .stars { color: #ffcc55; text-shadow: 0 2px 10px rgba(255,204,85,.35) }
 
-        h1 {
-            font-family: 'Pacifico', cursive;
-            font-size: 2.5rem;
-            color: var(--title-color);
-            margin-bottom: 20px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
+  main {
+    display: grid; place-items: center; padding: 6px 14px 18px;
+  }
+  .board {
+    width: 100%;
+    max-width: min(96vw, 640px);
+    display: grid; gap: var(--gap);
+    grid-template-columns: repeat(var(--cols, 4), var(--card-size));
+    justify-content: center;
+    touch-action: manipulation;
+  }
+  .card {
+    width: var(--card-size); height: var(--card-size);
+    perspective: 1000px;
+  }
+  .card button {
+    all: unset; display: block; width: 100%; height: 100%; cursor: pointer;
+    position: relative; border-radius: 12px; outline: none;
+  }
+  .face {
+    position: absolute; inset: 0; display: grid; place-items: center;
+    backface-visibility: hidden; border-radius: 12px; transition: transform .45s cubic-bezier(.2,.8,.2,1), box-shadow .3s;
+  }
+  .front {
+    background: var(--panel);
+    border: 1px solid rgba(255,255,255,.08);
+    box-shadow: var(--shadow);
+  }
+  .back {
+    transform: rotateY(180deg);
+    background: radial-gradient(120px 120px at 30% 30%, rgba(255,255,255,.08), transparent), var(--card);
+    border: 1px dashed rgba(255,255,255,.18);
+  }
+  .card button[data-state="flipped"] .front { transform: rotateY(180deg) }
+  .card button[data-state="flipped"] .back { transform: rotateY(0deg) }
+  .icon { font-size: clamp(26px, 7vw, 40px) }
+  .matched .back { box-shadow: 0 0 0 2px var(--good) inset, 0 8px 18px rgba(45, 212, 191, .25) }
+  .nope { animation: shake .28s linear }
+  @keyframes shake {
+    10%, 90% { transform: translateX(-1px) }
+    20%, 80% { transform: translateX(2px) }
+    30%, 50%, 70% { transform: translateX(-4px) }
+    40%, 60% { transform: translateX(4px) }
+  }
 
-        .info-panel {
-            display: flex;
-            justify-content: space-between;
-            width: 100%;
-            margin-bottom: 20px;
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
+  .footer {
+    margin: 0 14px 22px; color: var(--muted); font-size: 13px; text-align: center;
+  }
 
-        .game-board {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            width: 100%;
-            max-width: 500px;
-            margin: 0 auto;
-        }
-
-        .card {
-            background-color: var(--card-front-bg);
-            height: 100px;
-            border-radius: 12px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 2.5rem;
-            cursor: pointer;
-            user-select: none;
-            transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-            transform-style: preserve-3d;
-            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-        }
-        .card.is-flipped {
-            transform: rotateY(180deg);
-        }
-        .card .card-face {
-            backface-visibility: hidden;
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            border-radius: 12px;
-        }
-        .card .card-face-front {
-            background-color: var(--card-front-bg);
-            transform: rotateY(0deg);
-            color: var(--card-front-text-color);
-            font-size: 1.5rem;
-        }
-        .card .card-face-back {
-            background-color: var(--card-back-bg);
-            transform: rotateY(180deg);
-            color: var(--card-back-text-color);
-        }
-
-        .card.matched .card-face-back {
-            background-color: var(--matched-bg-1);
-            color: var(--matched-text-1);
-        }
-        .card.matched-2 .card-face-back {
-             background-color: var(--matched-bg-2);
-             color: var(--matched-text-2);
-        }
-        
-        .button-group {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-        }
-
-        .restart-button, .theme-button {
-            padding: 12px 24px;
-            font-size: 1rem;
-            font-weight: 600;
-            color: var(--card-front-text-color);
-            background-color: var(--button-bg);
-            border: none;
-            border-radius: 50px;
-            cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-            transition: background-color 0.3s ease, transform 0.2s ease;
-        }
-        .restart-button:hover, .theme-button:hover {
-            background-color: var(--button-hover-bg);
-            transform: translateY(-2px);
-        }
-        .theme-button {
-            padding: 12px;
-            font-size: 1.5rem;
-        }
-
-        .message-box {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0.8);
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 30px 40px;
-            border-radius: 15px;
-            font-size: 1.5rem;
-            font-weight: 600;
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
-            visibility: hidden;
-            opacity: 0;
-            transition: all 0.3s ease-in-out;
-            z-index: 10;
-        }
-        .message-box.show {
-            visibility: visible;
-            opacity: 1;
-            transform: translate(-50%, -50%) scale(1);
-        }
-    </style>
+  /* Dialog / overlay */
+  dialog {
+    border: none; border-radius: 16px; padding: 18px; color: var(--text);
+    background: var(--panel); box-shadow: var(--shadow); width: min(92vw, 480px);
+  }
+  dialog::backdrop { background: rgba(0,0,0,.55) backdrop-filter: blur(2px) }
+  .dialog-header { display: flex; align-items: center; justify-content: space-between; gap: 10px }
+  .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap }
+  .win .big { font-size: 42px; margin: 10px 0 0 }
+  .sr-only {
+    position: absolute !important;
+    width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden;
+    clip: rect(0,0,0,0); white-space: nowrap; border: 0;
+  }
+  /* Focus */
+  :focus-visible { outline: 3px solid var(--accent-2); outline-offset: 2px; border-radius: 10px }
+</style>
 </head>
-<body>
-    <div class="game-container">
-        <h1>Bereket's Memory Match Game</h1>
-        <div class="info-panel">
-            <div id="flips-count">Flips: 0</div>
-            <div id="matches-count">Matches: 0</div>
-        </div>
-        <div class="game-board" id="game-board"></div>
-        <div class="button-group">
-            <button class="restart-button" onclick="startGame()">Restart Game</button>
-            <button class="theme-button" onclick="toggleDarkMode()">🌙</button>
-        </div>
+<body data-theme="dark">
+  <a class="sr-only" href="#gameboard">Skip to board</a>
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">🂠</div>
+      <h1>Bereket's Memory Match Game</h1>
     </div>
-    <div id="message-box" class="message-box"></div>
-    <script>
-        // Array of card emojis (pairs)
-        const cardsArray = ['🎈', '🎉', '🌟', '🌈', '🍦', '🍩', '🚀', '👑'];
-        const allCards = [...cardsArray, ...cardsArray]; // Create pairs
+    <div class="controls">
+      <label class="sr-only" for="difficulty">Difficulty</label>
+      <select id="difficulty" title="Difficulty">
+        <option value="4x4">Easy 4×4</option>
+        <option value="5x4" selected>Normal 5×4</option>
+        <option value="6x6">Hard 6×6</option>
+      </select>
 
-        // Game state variables
-        let flips = 0;
-        let matches = 0;
-        let flippedCards = [];
-        let canFlip = true;
+      <label class="sr-only" for="theme">Theme</label>
+      <select id="theme" title="Card theme">
+        <option value="animals">Animals</option>
+        <option value="fruits" selected>Fruits</option>
+        <option value="space">Space</option>
+        <option value="shapes">Shapes</option>
+        <option value="flags">Flags</option>
+        <option value="mixed">Mixed</option>
+      </select>
 
-        const body = document.body;
-        const board = document.getElementById('game-board');
-        const flipsDisplay = document.getElementById('flips-count');
-        const matchesDisplay = document.getElementById('matches-count');
-        const messageBox = document.getElementById('message-box');
+      <button id="new" class="btn primary" title="Start a new game">New Game</button>
+      <button id="pause" class="btn" aria-pressed="false" title="Pause / Resume (P)">⏸️ Pause</button>
+      <button id="sound" class="btn" aria-pressed="true" title="Toggle sound (S)">🔊 Sound</button>
+      <button id="themeToggle" class="btn" aria-pressed="false" title="Toggle dark / light">🌙 Dark</button>
+    </div>
+  </header>
 
-        // Function to shuffle the cards using the Fisher-Yates algorithm
-        function shuffle(array) {
-            for (let i = array.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [array[i], array[j]] = [array[j], array[i]];
-            }
-            return array;
-        }
+  <section class="stats" aria-label="Game stats">
+    <div class="stat"><div class="label">Time</div><div id="time">00:00</div></div>
+    <div class="stat"><div class="label">Moves</div><div id="moves">0</div></div>
+    <div class="stat"><div class="label">Matches</div><div id="matches">0</div></div>
+    <div class="stat"><div class="label">Rating</div><div id="stars" class="stars" aria-label="Star rating">★★★</div></div>
+    <div class="stat"><div class="label">Best</div><div id="best">—</div></div>
+  </section>
 
-        // Function to create a single card element
-        function createCard(emoji) {
-            const card = document.createElement('div');
-            card.classList.add('card');
-            card.dataset.emoji = emoji;
+  <main>
+    <div id="gameboard" class="board" role="grid" aria-label="Memory cards grid"></div>
+  </main>
 
-            const cardFaceFront = document.createElement('div');
-            cardFaceFront.classList.add('card-face', 'card-face-front');
-            cardFaceFront.textContent = '✨';
+  <p class="footer">Tip: Use keyboard — arrows to move focus, Space/Enter to flip. P to pause, R to restart.</p>
 
-            const cardFaceBack = document.createElement('div');
-            cardFaceBack.classList.add('card-face', 'card-face-back');
-            cardFaceBack.textContent = emoji;
+  <!-- Win Dialog -->
+  <dialog id="win" class="win" aria-labelledby="winTitle">
+    <div class="dialog-header">
+      <h2 id="winTitle">You did it! 🎉</h2>
+      <button class="btn" id="closeWin" title="Close">✖</button>
+    </div>
+    <p class="big" id="winSummary"></p>
+    <div class="dialog-actions">
+      <button class="btn" id="share">Share</button>
+      <button class="btn primary" id="playAgain">Play Again</button>
+    </div>
+  </dialog>
 
-            card.appendChild(cardFaceFront);
-            card.appendChild(cardFaceBack);
+<script>
+(() => {
+  "use strict";
 
-            card.addEventListener('click', flipCard);
-            return card;
-        }
+  /*** CONFIG ***/
+  const THEMES = {
+    animals: ['🦊','🦁','🐼','🐨','🐸','🐵','🦄','🐶','🐱','🐰','🐯','🦉','🦋','🐙','🐧','🐻'],
+    fruits:  ['🍎','🍌','🍇','🍉','🍋','🍓','🍒','🍑','🍍','🥝','🥥','🍐','🍊','🫐','🍈','🥭'],
+    space:   ['🪐','🌍','🌞','🌚','⭐','☄️','🚀','🛰️','🌌','🌙','🌟','🔭','🧑‍🚀','🌠','🛰','🛸'],
+    shapes:  ['⬛','⬜','🔺','🔻','🔷','🔶','🟩','🟦','🟥','🟨','🔳','🔲','◀️','▶️','⏺️','⏹️'],
+    flags:   ['🇪🇹','🇺🇸','🇬🇧','🇯🇵','🇫🇷','🇨🇦','🇧🇷','🇩🇪','🇿🇦','🇪🇬','🇮🇳','🇨🇳','🇰🇷','🇪🇸','🇮🇹','🇸🇦'],
+    mixed:   null // generated by mixing all
+  };
+  const DIFFICULTY = {
+    "4x4": { rows: 4, cols: 4 },   // 8 pairs
+    "5x4": { rows: 4, cols: 5 },   // 10 pairs
+    "6x6": { rows: 6, cols: 6 },   // 18 pairs
+  };
+  const STORAGE_KEY = "bereket-memory-stats";
 
-        // Function to handle the card flip logic
-        function flipCard(event) {
-            const card = event.currentTarget;
+  /*** STATE ***/
+  const state = {
+    rows: 4, cols: 5,
+    deck: [],
+    first: null, second: null, lock: false,
+    moves: 0, matches: 0, pairs: 0,
+    started: false, paused: false,
+    startTs: 0, elapsed: 0, tickId: 0,
+    soundOn: true,
+    theme: 'fruits',
+  };
 
-            // Prevent flipping a matched or already flipped card, or if a timer is active
-            if (!canFlip || card.classList.contains('is-flipped') || card.classList.contains('matched')) {
-                return;
-            }
+  /*** ELEMENTS ***/
+  const $ = s => document.querySelector(s);
+  const board = $('#gameboard');
+  const timeEl = $('#time');
+  const movesEl = $('#moves');
+  const matchesEl = $('#matches');
+  const starsEl = $('#stars');
+  const bestEl = $('#best');
+  const winDlg = $('#win');
+  const winSummary = $('#winSummary');
+  const difficultySel = $('#difficulty');
+  const themeSel = $('#theme');
 
-            card.classList.add('is-flipped');
-            flippedCards.push(card);
-            flips++;
-            flipsDisplay.textContent = `Flips: ${flips}`;
+  /*** UTILITIES ***/
+  const clamp = (n, a, b) => Math.min(b, Math.max(a, n));
+  const pad2 = n => String(n).padStart(2, '0');
+  const formatTime = ms => {
+    const s = Math.floor(ms / 1000);
+    return `${pad2((s / 60) | 0)}:${pad2(s % 60)}`;
+  };
+  const shuffle = arr => { // Fisher-Yates
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = (Math.random() * (i + 1)) | 0;
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  };
+  const vibrate = pat => 'vibrate' in navigator && navigator.vibrate(pat);
 
-            // Check if two cards are flipped
-            if (flippedCards.length === 2) {
-                canFlip = false;
-                setTimeout(checkForMatch, 1000);
-            }
-        }
+  // Sound via WebAudio (tiny and offline)
+  let audio;
+  function beep(freq=600, dur=90, type='sine', vol=.07){
+    if(!state.soundOn) return;
+    try{
+      audio = audio || new (window.AudioContext||window.webkitAudioContext)();
+      const o = audio.createOscillator(), g = audio.createGain();
+      o.type = type; o.frequency.value = freq;
+      g.gain.value = vol;
+      o.connect(g); g.connect(audio.destination);
+      o.start();
+      setTimeout(()=>{ o.stop(); }, dur);
+    }catch{ /* no-op */ }
+  }
 
-        // Function to check if the two flipped cards match
-        function checkForMatch() {
-            const [card1, card2] = flippedCards;
+  // Local storage helpers
+  function loadBest(){
+    try {
+      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '{}');
+    } catch { return {}; }
+  }
+  function saveBest(data){
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(data)); } catch {}
+  }
 
-            if (card1.dataset.emoji === card2.dataset.emoji) {
-                // It's a match!
-                matches++;
-                matchesDisplay.textContent = `Matches: ${matches}`;
-                card1.classList.add('matched');
-                card2.classList.add('matched');
-                
-                // Add a secondary color to distinguish the matched pairs
-                if (matches % 2 === 0) {
-                     card1.classList.add('matched-2');
-                     card2.classList.add('matched-2');
-                }
+  function updateBestUI(){
+    const key = `${state.rows}x${state.cols}`;
+    const best = loadBest()[key];
+    bestEl.textContent = best ? `${formatTime(best.time)} • ${best.moves} mv` : '—';
+  }
 
-                // Check for win condition
-                if (matches === cardsArray.length) {
-                    showMessage('🥳 You Win! 🥳', true);
-                }
-            } else {
-                // Not a match, flip them back
-                card1.classList.remove('is-flipped');
-                card2.classList.remove('is-flipped');
-            }
+  /*** GAME LOGIC ***/
+  function getThemeIcons(theme, pairs){
+    let icons;
+    if(theme === 'mixed'){
+      icons = Object.values(THEMES).filter(Boolean).flat();
+    } else {
+      icons = THEMES[theme] ?? THEMES.fruits;
+    }
+    if(icons.length < pairs){
+      // fallback: mix everything to ensure we have enough unique icons
+      icons = Object.values(THEMES).filter(Boolean).flat();
+    }
+    return shuffle(icons.slice(0, pairs));
+  }
 
-            // Reset for the next turn
-            flippedCards = [];
-            canFlip = true;
-        }
+  function makeDeck(pairs, theme){
+    const icons = getThemeIcons(theme, pairs);
+    const deck = [];
+    let id = 0;
+    icons.forEach(icon => {
+      const a = { id: id++, icon, uid: cryptoRandom(), matched: false };
+      const b = { id: id++, icon, uid: a.uid, matched: false };
+      deck.push(a, b);
+    });
+    return shuffle(deck);
+  }
 
-        // Function to display a message
-        function showMessage(text, isWin = false) {
-            messageBox.textContent = text;
-            messageBox.classList.add('show');
-            if (isWin) {
-                setTimeout(() => {
-                    messageBox.classList.remove('show');
-                }, 3000);
-            }
-        }
+  function cryptoRandom(){
+    // creates a small string id to pair cards safely
+    const a = new Uint32Array(1);
+    (crypto||window.msCrypto).getRandomValues(a);
+    return a[0].toString(36);
+  }
 
-        // Function to toggle between light and dark mode
-        function toggleDarkMode() {
-            const themeButton = document.querySelector('.theme-button');
-            body.classList.toggle('dark-mode');
-            const isDarkMode = body.classList.contains('dark-mode');
-            localStorage.setItem('theme', isDarkMode ? 'dark' : 'light');
-            themeButton.textContent = isDarkMode ? '☀️' : '🌙';
-        }
+  function calcStars(){
+    // 3★ if under threshold, then 2★ then 1★
+    const baseMoves = state.pairs * 2; // optimal-ish
+    if(state.moves <= baseMoves + Math.ceil(state.pairs/3)) return 3;
+    if(state.moves <= baseMoves + Math.ceil(state.pairs/1.5)) return 2;
+    return 1;
+  }
 
-        // Function to start or restart the game
-        function startGame() {
-            // Reset game state
-            flips = 0;
-            matches = 0;
-            flippedCards = [];
-            canFlip = true;
+  function setStarsUI(){
+    const s = calcStars();
+    starsEl.textContent = '★'.repeat(s) + '☆'.repeat(3-s);
+    starsEl.setAttribute('aria-label', `${s} out of 3 stars`);
+  }
 
-            // Clear the board
-            board.innerHTML = '';
-            flipsDisplay.textContent = 'Flips: 0';
-            matchesDisplay.textContent = 'Matches: 0';
-            messageBox.classList.remove('show');
+  function setGridSize(rows, cols){
+    state.rows = rows; state.cols = cols;
+    board.style.setProperty('--cols', cols);
+  }
 
-            // Shuffle cards and create the board
-            const shuffledCards = shuffle(allCards);
-            shuffledCards.forEach(emoji => {
-                const cardElement = createCard(emoji);
-                board.appendChild(cardElement);
-            });
-            // Changed the message to not use a character that causes rendering issues.
-            showMessage('Find the matching pairs!', false);
-            
-            // Immediately hide message box after a few seconds
-            setTimeout(() => {
-                 messageBox.classList.remove('show');
-            }, 3000);
-        }
+  function resetStats(){
+    state.moves = 0; state.matches = 0; state.elapsed = 0; state.started = false;
+    movesEl.textContent = '0';
+    matchesEl.textContent = '0';
+    timeEl.textContent = '00:00';
+    setStarsUI();
+  }
 
-        // Check for saved theme preference on page load
-        function checkThemePreference() {
-            const savedTheme = localStorage.getItem('theme');
-            if (savedTheme === 'dark') {
-                body.classList.add('dark-mode');
-                document.querySelector('.theme-button').textContent = '☀️';
-            }
-        }
+  function buildCard(card, index){
+    const wrapper = document.createElement('div');
+    wrapper.className = 'card';
+    wrapper.role = 'gridcell';
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.dataset.index = index;
+    btn.dataset.state = 'hidden';
+    btn.setAttribute('aria-pressed', 'false');
+    btn.setAttribute('aria-label', 'Hidden card');
+    btn.addEventListener('click', onCardClick);
+    btn.addEventListener('keydown', onCardKey);
+    btn.innerHTML = `
+      <div class="face front" aria-hidden="true">❓</div>
+      <div class="face back" aria-hidden="true"><div class="icon">${card.icon}</div></div>
+    `;
+    wrapper.appendChild(btn);
+    return wrapper;
+  }
 
-        // Start the game and check for theme preference when the page loads
-        window.onload = () => {
-            checkThemePreference();
-            startGame();
-        };
-    </script>
+  function renderBoard(){
+    board.innerHTML = '';
+    board.style.setProperty('--cols', state.cols);
+    board.setAttribute('aria-rowcount', state.rows);
+    board.setAttribute('aria-colcount', state.cols);
+    const frag = document.createDocumentFragment();
+    state.deck.forEach((c,i)=> frag.appendChild(buildCard(c,i)));
+    board.appendChild(frag);
+    // focus first card for accessibility
+    const firstBtn = board.querySelector('.card button');
+    if(firstBtn) firstBtn.focus({preventScroll:true});
+  }
+
+  function startTimer(){
+    stopTimer();
+    state.startTs = performance.now() - state.elapsed;
+    state.tickId = requestAnimationFrame(tick);
+  }
+  function stopTimer(){
+    if(state.tickId){ cancelAnimationFrame(state.tickId); state.tickId = 0; }
+  }
+  function tick(t){
+    state.elapsed = t - state.startTs;
+    timeEl.textContent = formatTime(state.elapsed);
+    state.tickId = requestAnimationFrame(tick);
+  }
+
+  function pauseGame(force){
+    if(force === false){ resumeGame(); return; }
+    if(state.paused) return;
+    state.paused = true;
+    stopTimer();
+    Array.from(board.querySelectorAll('button')).forEach(b => b.disabled = true);
+    $('#pause').setAttribute('aria-pressed','true');
+    $('#pause').textContent = '▶️ Resume';
+  }
+  function resumeGame(){
+    if(!state.paused) return;
+    state.paused = false;
+    startTimer();
+    Array.from(board.querySelectorAll('button')).forEach(b => b.disabled = false);
+    $('#pause').setAttribute('aria-pressed','false');
+    $('#pause').textContent = '⏸️ Pause';
+  }
+
+  function onCardKey(e){
+    const btn = e.currentTarget;
+    const idx = +btn.dataset.index;
+    const cols = state.cols;
+    let target;
+    switch(e.key){
+      case 'ArrowRight': target = board.querySelector(`button[data-index="${idx+1}"]`); break;
+      case 'ArrowLeft':  target = board.querySelector(`button[data-index="${idx-1}"]`); break;
+      case 'ArrowDown':  target = board.querySelector(`button[data-index="${idx+cols}"]`); break;
+      case 'ArrowUp':    target = board.querySelector(`button[data-index="${idx-cols}"]`); break;
+      case ' ': case 'Enter':
+        e.preventDefault(); btn.click(); return;
+    }
+    if(target){ target.focus(); e.preventDefault(); }
+  }
+
+  function onCardClick(e){
+    if(state.lock || state.paused) return;
+    const btn = e.currentTarget;
+    const idx = +btn.dataset.index;
+    const card = state.deck[idx];
+    if(card.matched || btn.dataset.state === 'flipped') return;
+
+    if(!state.started){
+      state.started = true;
+      startTimer();
+    }
+
+    flip(btn, true);
+    beep(700,70,'triangle',.05);
+
+    if(!state.first){
+      state.first = { idx, btn, card };
+      return;
+    }
+
+    if(idx === state.first.idx){
+      // same card double click; ignore
+      return;
+    }
+
+    state.second = { idx, btn, card };
+    state.lock = true;
+    state.moves++;
+    movesEl.textContent = String(state.moves);
+
+    const isMatch = state.first.card.uid === state.second.card.uid;
+    if(isMatch){
+      handleMatch();
+    } else {
+      handleNope();
+    }
+    setStarsUI();
+  }
+
+  function flip(btn, show){
+    btn.dataset.state = show ? 'flipped' : 'hidden';
+    btn.setAttribute('aria-pressed', show ? 'true' : 'false');
+  }
+
+  function handleMatch(){
+    const { first, second } = state;
+    first.card.matched = true;
+    second.card.matched = true;
+    first.btn.parentElement.classList.add('matched');
+    second.btn.parentElement.classList.add('matched');
+    state.matches++;
+    matchesEl.textContent = String(state.matches);
+    vibrate([20,40,20]);
+    beep(880,90,'sine',.08);
+    state.first = state.second = null;
+    state.lock = false;
+
+    if(state.matches === state.pairs){
+      win();
+    }
+  }
+
+  function handleNope(){
+    const { first, second } = state;
+    vibrate(60);
+    beep(180,110,'sawtooth',.05);
+    // shake
+    first.btn.classList.add('nope');
+    second.btn.classList.add('nope');
+    setTimeout(()=>{
+      first.btn.classList.remove('nope');
+      second.btn.classList.remove('nope');
+      flip(first.btn, false);
+      flip(second.btn, false);
+      state.first = state.second = null;
+      state.lock = false;
+    }, 520);
+  }
+
+  function win(){
+    stopTimer();
+    const time = state.elapsed;
+    const moves = state.moves;
+    const stars = calcStars();
+    // Save best
+    const key = `${state.rows}x${state.cols}`;
+    const best = loadBest();
+    if(!best[key] || time < best[key].time || (time === best[key].time && moves < best[key].moves)){
+      best[key] = { time, moves, when: Date.now() };
+      saveBest(best);
+    }
+    updateBestUI();
+    // Summary Text
+    winSummary.textContent = `Time ${formatTime(time)} • ${moves} moves • ${'★'.repeat(stars)}${'☆'.repeat(3-stars)}`;
+    // Show dialog
+    winDlg.showModal();
+    try { beep(1000,140,'triangle',.09); setTimeout(()=>beep(1300,120,'triangle',.09), 150);}catch{}
+  }
+
+  /*** NEW GAME ***/
+  function newGame(){
+    // pull from UI
+    const diff = difficultySel.value;
+    const {rows, cols} = DIFFICULTY[diff];
+    const pairs = (rows*cols)/2 | 0;
+    setGridSize(rows, cols);
+    state.theme = themeSel.value;
+    state.deck = makeDeck(pairs, state.theme);
+    state.pairs = pairs;
+    state.lock = false; state.first = state.second = null; state.paused = false;
+    resetStats();
+    renderBoard();
+    updateBestUI();
+    // small entry animation hint (staggered flip preview)
+    preview();
+  }
+
+  async function preview(){
+    // quick "remember this" animation on new game
+    const buttons = Array.from(board.querySelectorAll('button'));
+    // flip all briefly on very small boards only (<= 20 cards)
+    if(buttons.length <= 20){
+      buttons.forEach(b => b.dataset.state = 'flipped');
+      await wait(650);
+      buttons.forEach(b => b.dataset.state = 'hidden');
+    } else {
+      // staggered ripple for larger boards
+      for (let i=0; i<buttons.length; i++){
+        buttons[i].animate([{transform:'scale(1)'},{transform:'scale(.97)'},{transform:'scale(1)'}], {duration:250, easing:'ease-out'});
+        await wait(12);
+      }
+    }
+  }
+
+  const wait = ms => new Promise(r => setTimeout(r, ms));
+
+  /*** UI EVENTS ***/
+  $('#new').addEventListener('click', newGame);
+  difficultySel.addEventListener('change', newGame);
+  themeSel.addEventListener('change', newGame);
+
+  $('#pause').addEventListener('click', () => {
+    if(!state.started){ return; }
+    if(state.paused) resumeGame(); else pauseGame(true);
+  });
+
+  $('#sound').addEventListener('click', (e) => {
+    state.soundOn = !state.soundOn;
+    e.currentTarget.setAttribute('aria-pressed', String(state.soundOn));
+    e.currentTarget.textContent = state.soundOn ? '🔊 Sound' : '🔇 Sound';
+    if(state.soundOn) beep(900,60,'square',.05);
+  });
+
+  $('#themeToggle').addEventListener('click', (e) => {
+    const isDark = document.body.getAttribute('data-theme') !== 'light';
+    document.body.setAttribute('data-theme', isDark ? 'light' : 'dark');
+    e.currentTarget.textContent = isDark ? '🌞 Light' : '🌙 Dark';
+  });
+
+  // Dialog buttons
+  $('#closeWin').addEventListener('click', () => winDlg.close());
+  $('#playAgain').addEventListener('click', () => { winDlg.close(); newGame(); });
+  $('#share').addEventListener('click', async () => {
+    const text = `I beat Bereket's Memory Match in ${timeEl.textContent} with ${movesEl.textContent} moves!`;
+    try{
+      if(navigator.share){
+        await navigator.share({ text, title: document.title });
+      } else {
+        await navigator.clipboard.writeText(text);
+        alert('Copied result to clipboard!');
+      }
+    }catch{}
+  });
+
+  // Keyboard shortcuts
+  window.addEventListener('keydown', (e) => {
+    if(e.repeat) return;
+    if(e.key.toLowerCase() === 'p') {
+      if(!state.started) return;
+      state.paused ? resumeGame() : pauseGame(true);
+    }
+    if(e.key.toLowerCase() === 'r') newGame();
+    if(e.key.toLowerCase() === 's') $('#sound').click();
+  });
+
+  // Prevent multi-touch zoom glitches during rapid taps
+  document.addEventListener('gesturestart', e => e.preventDefault());
+  document.addEventListener('dblclick', e => e.preventDefault(), { passive:false });
+
+  // Service Worker (optional offline)
+  if('serviceWorker' in navigator){
+    const swCode = `
+      self.addEventListener('install', e => { self.skipWaiting(); });
+      self.addEventListener('activate', e => { self.clients.claim(); });
+      self.addEventListener('fetch', e => { /* network passthrough; app works offline as single file */ });
+    `;
+    const blob = new Blob([swCode], {type:'text/javascript'});
+    const url = URL.createObjectURL(blob);
+    navigator.serviceWorker.register(url).catch(()=>{});
+  }
+
+  // Init
+  newGame();
+})();
+</script>
 </body>
 </html>
