@@ -98,17 +98,19 @@
     display: grid; place-items: center; padding: 6px 14px 18px;
   }
   .board {
-    width: 100%;
-    max-width: min(96vw, 640px);
-    display: grid; gap: var(--gap);
-    grid-template-columns: repeat(var(--cols, 4), var(--card-size));
-    justify-content: center;
-    touch-action: manipulation;
-  }
-  .card {
-    width: var(--card-size); height: var(--card-size);
-    perspective: 1000px;
-  }
+  width: 100%;
+  max-width: 100%; /* let it stretch across the phone */
+  display: grid;
+  gap: var(--gap);
+  grid-template-columns: repeat(var(--cols, 4), 1fr); /* auto-fit columns */
+  justify-items: center;
+}
+
+.card {
+  aspect-ratio: 1 / 1; /* keep them square */
+  width: 100%; /* each takes fraction of row */
+  max-width: calc(100vw / var(--cols) - var(--gap) * 1.5);
+}
   .card button {
     all: unset; display: block; width: 100%; height: 100%; cursor: pointer;
     position: relative; border-radius: 12px; outline: none;
