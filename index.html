@@ -97,19 +97,23 @@
   main {
     display: grid; place-items: center; padding: 6px 14px 18px;
   }
-  .board {
-  width: 100%;
-  max-width: 100%; /* let it stretch across the phone */
+ .board {
   display: grid;
   gap: var(--gap);
-  grid-template-columns: repeat(var(--cols, 4), 1fr); /* auto-fit columns */
+  grid-template-columns: repeat(var(--cols, 4), 1fr);
+  grid-template-rows: repeat(var(--rows, 4), 1fr);
+  width: 100vw;
+  height: calc(100vh - 180px); /* leave room for header/stats/footer */
+  max-width: 100vw;
+  max-height: calc(100vh - 180px);
   justify-items: center;
+  align-items: center;
 }
 
 .card {
-  aspect-ratio: 1 / 1; /* keep them square */
-  width: 100%; /* each takes fraction of row */
-  max-width: calc(100vw / var(--cols) - var(--gap) * 1.5);
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 1 / 1;
 }
   .card button {
     all: unset; display: block; width: 100%; height: 100%; cursor: pointer;
@@ -362,10 +366,12 @@
     starsEl.setAttribute('aria-label', `${s} out of 3 stars`);
   }
 
-  function setGridSize(rows, cols){
-    state.rows = rows; state.cols = cols;
-    board.style.setProperty('--cols', cols);
-  }
+function setGridSize(rows, cols){
+  state.rows = rows; 
+  state.cols = cols;
+  board.style.setProperty('--cols', cols);
+  board.style.setProperty('--rows', rows);
+}
 
   function resetStats(){
     state.moves = 0; state.matches = 0; state.elapsed = 0; state.started = false;
